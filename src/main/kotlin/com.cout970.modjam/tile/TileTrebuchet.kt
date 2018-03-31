@@ -1,4 +1,4 @@
-package com.cout970.modjam
+package com.cout970.modjam.tile
 
 import net.minecraft.tileentity.TileEntity
 

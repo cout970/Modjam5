@@ -1,12 +1,9 @@
 package com.cout970.modjam
 
-import net.minecraft.block.Block
-import net.minecraftforge.fml.common.registry.GameRegistry
+import com.cout970.modjam.block.BlockTrebuchet
 
 
 object BlockHolder {
 
-    @JvmStatic
-    @GameRegistry.ObjectHolder("$MOD_ID:trebuchet")
-    public val trebuchet: Block? = null
+    val trebuchet = BlockTrebuchet()
 }
