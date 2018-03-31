@@ -54,14 +54,16 @@ open class CommonProxy {
 
 class ClientProxy : CommonProxy() {
 
+    val trebuchetRenderer = TileRendererTrebuchet()
+
     override fun preinit() {
         super.preinit()
-        ClientRegistry.bindTileEntitySpecialRenderer(TileTrebuchet::class.java, TileRendererTrebuchet)
+        ClientRegistry.bindTileEntitySpecialRenderer(TileTrebuchet::class.java, trebuchetRenderer)
     }
 
     @Suppress("unused", "UNUSED_PARAMETER")
     @SubscribeEvent
     fun onModelRegistryReload(event: ModelBakeEvent) {
-        TileRendererTrebuchet.reloadModel()
+        trebuchetRenderer.reloadModel()
     }
 }

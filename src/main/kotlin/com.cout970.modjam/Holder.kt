@@ -4,6 +4,5 @@ import com.cout970.modjam.block.BlockTrebuchet
 
 
 object BlockHolder {
-
     val trebuchet = BlockTrebuchet()
 }
