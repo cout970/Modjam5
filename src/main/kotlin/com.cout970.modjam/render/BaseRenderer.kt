@@ -10,7 +10,7 @@ abstract class BaseRenderer<T : TileEntity> : TileEntitySpecialRenderer<T>() {
 
     override fun render(te: T, x: Double, y: Double, z: Double, partialTicks: Float, destroyStage: Int, alpha: Float) {
         stackMatrix {
-            translate(x, y, z + 2)
+            translate(x, y, z)
             renderTile(te, partialTicks)
         }
     }
