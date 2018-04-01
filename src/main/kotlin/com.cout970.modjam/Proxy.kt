@@ -3,6 +3,7 @@ package com.cout970.modjam
 import com.cout970.modelloader.api.DefaultBlockDecorator
 import com.cout970.modelloader.api.ModelLoaderApi
 import com.cout970.modjam.render.TileRendererTrebuchet
+import com.cout970.modjam.tile.TileGap
 import com.cout970.modjam.tile.TileTrebuchet
 import net.minecraft.block.Block
 import net.minecraft.client.renderer.block.model.ModelResourceLocation
@@ -23,11 +24,13 @@ open class CommonProxy {
     open fun preinit() {
         MinecraftForge.EVENT_BUS.register(this)
         TileEntity.register("$MOD_ID:trebuchet", TileTrebuchet::class.java)
+        TileEntity.register("$MOD_ID:gap", TileGap::class.java)
     }
 
     @SubscribeEvent
     fun registerBlocks(event: RegistryEvent.Register<Block>) {
         event.registry.registerBlock(BlockHolder.trebuchet, "trebuchet", "trebuchet")
+        event.registry.registerBlock(BlockHolder.gap, "gap", null)
     }
 
     @SubscribeEvent
@@ -35,13 +38,15 @@ open class CommonProxy {
         event.registry.registerItemBlock(BlockHolder.trebuchet)
     }
 
-    private fun IForgeRegistry<Block>.registerBlock(instance: Block, name: String, model: String) {
+    private fun IForgeRegistry<Block>.registerBlock(instance: Block, name: String, model: String?) {
         instance.registryName = ResourceLocation("$MOD_ID:$name")
 
-        ModelLoaderApi.registerModelWithDecorator(
-                ModelResourceLocation(instance.registryName!!, "inventory"),
-                ResourceLocation(MOD_ID, "models/$model.mcx"), DefaultBlockDecorator
-        )
+        if (model != null) {
+            ModelLoaderApi.registerModelWithDecorator(
+                    ModelResourceLocation(instance.registryName!!, "inventory"),
+                    ResourceLocation(MOD_ID, "models/$model.mcx"), DefaultBlockDecorator
+            )
+        }
         register(instance)
     }
 

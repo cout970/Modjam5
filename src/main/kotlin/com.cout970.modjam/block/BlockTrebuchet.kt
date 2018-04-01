@@ -36,7 +36,7 @@ class BlockTrebuchet : BlockBase(Material.WOOD) {
         val active = state.getValue(PROPERTY_ACTIVE)
         val facing = state.getValue(PROPERTY_FACING)
 
-        return (if (active) 1 else 0) or (facing.horizontalIndex)
+        return (if (active) 1 else 0) or (facing.horizontalIndex shl 1)
     }
 
     override fun onBlockPlacedBy(worldIn: World, pos: BlockPos, state: IBlockState, placer: EntityLivingBase, stack: ItemStack) {
@@ -47,7 +47,7 @@ class BlockTrebuchet : BlockBase(Material.WOOD) {
 
     override fun onBlockActivated(worldIn: World, pos: BlockPos, state: IBlockState, playerIn: EntityPlayer, hand: EnumHand, facing: EnumFacing, hitX: Float, hitY: Float, hitZ: Float): Boolean {
         val tile = worldIn.getTileEntity(pos) as? TileTrebuchet ?: return false
-        tile.onClick(playerIn)
+        tile.onClick(state, playerIn)
         return true
     }
 

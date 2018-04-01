@@ -1,5 +1,6 @@
 package com.cout970.modjam
 
+import net.minecraft.util.math.AxisAlignedBB
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.SidedProxy
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
@@ -12,6 +13,8 @@ const val MOD_NAME = "Trebuchet"
 const val MOD_VERSION = "0.0.0"
 
 lateinit var LOGGER: Logger
+
+typealias AABB = AxisAlignedBB
 
 @Mod(modid = MOD_ID, name = MOD_NAME, version = MOD_VERSION, modLanguage = "kotlin")
 class Trebuchet {

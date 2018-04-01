@@ -1,16 +1,21 @@
 package com.cout970.modjam.render
 
+import com.cout970.modjam.AABB
+import com.cout970.modjam.tile.TileTrebuchet
 import com.cout970.vector.api.IVector3
-import com.cout970.vector.extensions.vec3Of
-import com.cout970.vector.extensions.xd
-import com.cout970.vector.extensions.yd
-import com.cout970.vector.extensions.zd
+import com.cout970.vector.extensions.*
+import net.minecraft.block.properties.IProperty
+import net.minecraft.block.state.IBlockState
+import net.minecraft.client.Minecraft
 import net.minecraft.client.renderer.BufferBuilder
 import net.minecraft.client.renderer.GlStateManager
+import net.minecraft.client.renderer.GlStateManager.*
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.renderer.block.model.ModelResourceLocation
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.util.EnumFacing
+import net.minecraft.util.math.AxisAlignedBB
+import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import org.lwjgl.opengl.GL11.*
 
@@ -176,6 +181,108 @@ object Util {
         rotate(0f, angle, 0f)
         translate(-0.5, -0.5, -0.5)
     }
+
+    fun renderFloatingLabel(str: String, pos: Vec3d) {
+        val x = pos.x
+        val y = pos.y
+        val z = pos.z
+        val renderManager = Minecraft.getMinecraft().renderManager
+        val fontrenderer = renderManager.fontRenderer
+        val f = 1.6f
+        val f1 = 0.016666668f * f
+        pushMatrix()
+        translate(x.toFloat() + 0.0f, y.toFloat() + 0.5f, z.toFloat())
+        GlStateManager.glNormal3f(0.0f, 1.0f, 0.0f)
+        rotate(-renderManager.playerViewY, 0.0f, 1.0f, 0.0f)
+        rotate(renderManager.playerViewX, 1.0f, 0.0f, 0.0f)
+        scale(-f1, -f1, f1)
+        disableLighting()
+        depthMask(false)
+        disableDepth()
+        enableBlend()
+        tryBlendFuncSeparate(770, 771, 1, 0)
+        val tessellator = Tessellator.getInstance()
+        val worldrenderer = tessellator.buffer
+        val i = 0
+
+        val j = fontrenderer.getStringWidth(str) / 2
+        disableTexture2D()
+        worldrenderer.begin(7, DefaultVertexFormats.POSITION_COLOR)
+        worldrenderer.pos((-j - 1).toDouble(), (-1 + i).toDouble(), 0.0).color(0.0f, 0.0f, 0.0f, 0.25f).endVertex()
+        worldrenderer.pos((-j - 1).toDouble(), (8 + i).toDouble(), 0.0).color(0.0f, 0.0f, 0.0f, 0.25f).endVertex()
+        worldrenderer.pos((j + 1).toDouble(), (8 + i).toDouble(), 0.0).color(0.0f, 0.0f, 0.0f, 0.25f).endVertex()
+        worldrenderer.pos((j + 1).toDouble(), (-1 + i).toDouble(), 0.0).color(0.0f, 0.0f, 0.0f, 0.25f).endVertex()
+        tessellator.draw()
+        enableTexture2D()
+        fontrenderer.drawString(str, -fontrenderer.getStringWidth(str) / 2, i, 553648127)
+        enableDepth()
+        depthMask(true)
+        fontrenderer.drawString(str, -fontrenderer.getStringWidth(str) / 2, i, -1)
+        enableLighting()
+        disableBlend()
+        color(1.0f, 1.0f, 1.0f, 1.0f)
+        popMatrix()
+    }
+
+    fun renderMultiblockHitboxes(facing: EnumFacing) {
+        TileTrebuchet.getGlobalCollisionBoxes().map {
+            val origin = EnumFacing.SOUTH.rotateBox(vec3Of(0.5), it)
+            facing.rotateBox(vec3Of(0.5), origin)
+        }.forEach { renderBox(it) }
+    }
+
+    fun renderBox(box: AxisAlignedBB, color: IVector3 = vec3Of(1, 1, 1)) {
+        val tes = Tessellator.getInstance()
+        val t = tes.buffer
+        val r = color.xf
+        val g = color.yf
+        val b = color.zf
+        val a = 1f
+
+//        glDisable(GL_TEXTURE_2D)
+        bindTexture(0)
+        GlStateManager.glLineWidth(2f)
+        t.begin(GL_LINES, DefaultVertexFormats.POSITION_COLOR)
+        t.pos(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex()
+        t.pos(box.maxX, box.minY, box.minZ).color(r, g, b, a).endVertex()
+
+        t.pos(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex()
+        t.pos(box.minX, box.maxY, box.minZ).color(r, g, b, a).endVertex()
+
+        t.pos(box.minX, box.minY, box.minZ).color(r, g, b, a).endVertex()
+        t.pos(box.minX, box.minY, box.maxZ).color(r, g, b, a).endVertex()
+
+        t.pos(box.maxX, box.maxY, box.maxZ).color(r, g, b, a).endVertex()
+        t.pos(box.minX, box.maxY, box.maxZ).color(r, g, b, a).endVertex()
+
+        t.pos(box.maxX, box.maxY, box.maxZ).color(r, g, b, a).endVertex()
+        t.pos(box.maxX, box.minY, box.maxZ).color(r, g, b, a).endVertex()
+
+        t.pos(box.maxX, box.maxY, box.maxZ).color(r, g, b, a).endVertex()
+        t.pos(box.maxX, box.maxY, box.minZ).color(r, g, b, a).endVertex()
+
+        t.pos(box.minX, box.maxY, box.minZ).color(r, g, b, a).endVertex()
+        t.pos(box.maxX, box.maxY, box.minZ).color(r, g, b, a).endVertex()
+
+        t.pos(box.maxX, box.minY, box.minZ).color(r, g, b, a).endVertex()
+        t.pos(box.maxX, box.maxY, box.minZ).color(r, g, b, a).endVertex()
+
+        t.pos(box.minX, box.maxY, box.minZ).color(r, g, b, a).endVertex()
+        t.pos(box.minX, box.maxY, box.maxZ).color(r, g, b, a).endVertex()
+
+        t.pos(box.maxX, box.minY, box.maxZ).color(r, g, b, a).endVertex()
+        t.pos(box.minX, box.minY, box.maxZ).color(r, g, b, a).endVertex()
+
+        t.pos(box.minX, box.maxY, box.maxZ).color(r, g, b, a).endVertex()
+        t.pos(box.minX, box.minY, box.maxZ).color(r, g, b, a).endVertex()
+
+        t.pos(box.maxX, box.minY, box.maxZ).color(r, g, b, a).endVertex()
+        t.pos(box.maxX, box.minY, box.minZ).color(r, g, b, a).endVertex()
+
+        tes.draw()
+//        glEnable(GL_TEXTURE_2D)
+    }
+
 }
 
 val Number.rads: Float get() = Math.toRadians(this.toDouble()).toFloat()
@@ -184,3 +291,49 @@ val Double.px: Double get() = this * 1.0 / 16.0
 val Int.px: Float get() = this * 1f / 16f
 
 
+fun EnumFacing.rotatePoint(point: BlockPos): BlockPos {
+    val rel = point
+    val rot = when (this) {
+        EnumFacing.DOWN -> return BlockPos(BlockPos(Vec3d(rel).rotatePitch(-90.0f)))
+        EnumFacing.UP -> return BlockPos(BlockPos(Vec3d(rel).rotatePitch(90.0f)))
+        EnumFacing.NORTH -> return point
+        EnumFacing.SOUTH -> 180.0f
+        EnumFacing.WEST -> 90.0f
+        EnumFacing.EAST -> 360f - 90.0f
+    }
+    val pos2 = Vec3d(rel).rotateYaw(rot.rads)
+    val pos3 = pos2.transform { Math.round(it).toDouble() }
+    return BlockPos(pos3)
+}
+
+fun EnumFacing.rotatePoint(origin: Vec3d, point: Vec3d): Vec3d {
+    val rel = point - origin
+    val rot = when (this) {
+        EnumFacing.DOWN -> return origin + rel.rotatePitch(90.rads)
+        EnumFacing.UP -> return origin + rel.rotatePitch((-90).rads)
+        EnumFacing.NORTH -> return point
+        EnumFacing.SOUTH -> 180.0f
+        EnumFacing.WEST -> 90.0f
+        EnumFacing.EAST -> -90.0f
+    }
+    return origin + rel.rotateYaw(rot.rads)
+}
+
+
+fun EnumFacing.rotateBox(origin: Vec3d, box: AABB): AABB {
+    val min = Vec3d(box.minX, box.minY, box.minZ)
+    val max = Vec3d(box.maxX, box.maxY, box.maxZ)
+    return rotatePoint(origin, min) toAABBWith rotatePoint(origin, max)
+}
+
+infix fun BlockPos.toAABBWith(other: BlockPos) = AxisAlignedBB(this, other)
+infix fun Vec3d.toAABBWith(other: Vec3d) = AxisAlignedBB(this, other)
+
+fun AxisAlignedBB.cut(other: AxisAlignedBB): AxisAlignedBB? {
+    if (!this.intersects(other)) return null
+    return AxisAlignedBB(
+            Math.max(minX, other.minX), Math.max(minY, other.minY), Math.max(minZ, other.minZ),
+            Math.min(maxX, other.maxX), Math.min(maxY, other.maxY), Math.min(maxZ, other.maxZ))
+}
+
+fun <T : Comparable<T>> IBlockState.value(prop: IProperty<T>): T? = if (prop in propertyKeys) getValue(prop) else null

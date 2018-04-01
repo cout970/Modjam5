@@ -35,10 +35,14 @@ class TileRendererTrebuchet : BaseRenderer<TileTrebuchet>() {
 
     override fun renderTile(te: TileTrebuchet, partialTicks: Float) {
 
-        rotateFromCenter(te.facing, 180f)
-        translate(0, 0, 2)
-
         if (!te.active) {
+            te.constructionItems.items.forEachIndexed { index, itemStack ->
+                val txt = "${itemStack.count} x ${itemStack.displayName}"
+                Util.renderFloatingLabel(txt, vec3Of(0.5, 1 + index * 6.px, 0.5))
+            }
+
+            rotateFromCenter(te.facing, 180f)
+            translate(0, 0, 2)
             enableBlend()
             GL14.glBlendColor(1f, 1f, 1f, 0.5f)
             glBlendFunc(GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA)
@@ -49,8 +53,12 @@ class TileRendererTrebuchet : BaseRenderer<TileTrebuchet>() {
             end1.renderTextured()
             mass1.renderTextured()
             disableBlend()
+
             return
         }
+
+        rotateFromCenter(te.facing, 180f)
+        translate(0, 0, 2)
 
         val anim = te.animation
 
